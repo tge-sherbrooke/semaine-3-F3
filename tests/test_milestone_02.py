@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Milestone 2: I2C Sensor Reading (35 points)
 ============================================
@@ -186,7 +185,7 @@ def test_humidity_reading():
             f"  humidity = sensor.relative_humidity\n"
             f"  print(f\"Humidity: {{humidity:.1f}} %RH\")\n"
             f"\n"
-            f"The AHT20 provides temperature AND humidity (unlike BMP280).\n"
+            f"The AHT20 provides both temperature and humidity readings.\n"
         )
 
 

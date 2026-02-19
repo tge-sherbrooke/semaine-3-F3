@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Milestone 3: Retry Logic and Quality (40 points)
 =================================================

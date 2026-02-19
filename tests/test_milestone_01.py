@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Milestone 1: Environment Setup (25 points)
 ==========================================

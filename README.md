@@ -1,9 +1,24 @@
-# Formatif F3 — Capteur I2C AHT20
+# Formatif F3 — Capteurs I2C AHT20 + VCNL4200
 
 **Cours** : 243-413-SH — Introduction aux objets connectes
 **Semaine** : 3
 **Type** : Formative (non notee)
 **Retries** : Illimites - poussez autant de fois que necessaire!
+
+---
+
+> **Pratique autonome** -- Ce formatif est une evaluation formative (non notee). Contrairement au laboratoire guide, vous devez completer les taches de maniere autonome. Les tests automatiques vous donnent une retroaction immediate a chaque push.
+
+## Ce que vous avez appris en labo
+
+Le laboratoire de la semaine 3 vous a guide a travers :
+
+- Detection de plusieurs peripheriques I2C avec `i2cdetect` (AHT20 et VCNL4200)
+- Lecture du capteur AHT20 avec le pattern de retry
+- Combinaison de deux capteurs heterogenes (AHT20 + VCNL4200) sur le meme bus I2C
+- Comprehension de la difference entre I2C et one-wire
+
+Ce formatif vous demande d'appliquer ces competences de maniere autonome.
 
 ---
 
@@ -16,6 +31,7 @@ Ce formatif utilise des **jalons progressifs** avec retroaction detaillee:
 | **Milestone 1** | 25 pts | Script existe, syntaxe valide, tests locaux executes |
 | **Milestone 2** | 35 pts | I2C initialise, capteur AHT20 cree, lecture temperature/humidite |
 | **Milestone 3** | 40 pts | Logique de retry, gestion d'erreurs, qualite du code |
+| **Milestone 4** | 25 pts | Integration multi-capteurs VCNL4200 (proximite + lumiere) |
 
 **Chaque test echoue vous dit**:
 - Ce qui etait attendu
@@ -31,6 +47,7 @@ Ce formatif vise a verifier que vous etes capable de :
 2. Lire un capteur AHT20 (temperature et humidite)
 3. Implementer une logique de retry (comme pour le DHT22)
 4. Gerer les erreurs de communication
+5. Integrer un deuxieme capteur VCNL4200 (proximite et lumiere) sur le meme bus I2C
 
 ---
 
@@ -84,12 +101,11 @@ uv pip install adafruit-circuitpython-ahtx0
 sudo i2cdetect -y 1
 ```
 
-Vous devriez voir `38` pour le capteur AHT20.
+Vous devriez voir `38` pour le capteur AHT20 et `51` pour le VCNL4200 (si connecte).
 
 ### Etape 3 : Creer aht20_sensor.py
 
 ```python
-#!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.9"
 # dependencies = ["adafruit-circuitpython-ahtx0", "adafruit-blinka"]
@@ -156,17 +172,60 @@ git push
 
 ---
 
-## Comparaison AHT20 vs BMP280
+## Capteurs I2C utilises
 
-| Caracteristique | AHT20 | BMP280 |
-|-----------------|-------|--------|
-| Adresse I2C | 0x38 | 0x76 ou 0x77 |
-| Temperature | Oui | Oui |
+| Caracteristique | AHT20 | VCNL4200 |
+|-----------------|-------|----------|
+| Adresse I2C | 0x38 | 0x51 |
+| Temperature | Oui | Non |
 | Humidite | Oui | Non |
-| Pression | Non | Oui |
-| Altitude | Non | Oui (calculee) |
+| Proximite | Non | Oui |
+| Lumiere ambiante (lux) | Non | Oui |
+| Connecteur | STEMMA QT | STEMMA QT |
+| Produit Adafruit | 4566 | 6064 |
 
-Les deux capteurs peuvent etre utilises ensemble sur le meme bus I2C!
+Les deux capteurs se connectent en daisy-chain via cable STEMMA QT sur le meme bus I2C!
+
+### Materiel requis
+
+- Raspberry Pi avec I2C active
+- AHT20 (Adafruit 4566) — temperature + humidite
+- VCNL4200 (Adafruit 6064) — proximite + lumiere ambiante
+- Cable STEMMA QT pour connexion daisy-chain
+
+---
+
+## Milestone 4 : Integration multi-capteurs (VCNL4200)
+
+Apres avoir complete les Milestones 1-3 avec l'AHT20, creez un script
+`multi_capteurs.py` qui combine les deux capteurs :
+
+```python
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["adafruit-circuitpython-ahtx0", "adafruit-circuitpython-vcnl4200", "adafruit-blinka"]
+# ///
+"""Lecture multi-capteurs AHT20 + VCNL4200 via I2C."""
+
+import board
+import adafruit_ahtx0
+import adafruit_vcnl4200
+
+i2c = board.I2C()
+aht = adafruit_ahtx0.AHTx0(i2c)
+vcnl = adafruit_vcnl4200.Adafruit_VCNL4200(i2c)
+
+print(f"Temperature: {aht.temperature:.1f} C")
+print(f"Humidite: {aht.relative_humidity:.1f} %RH")
+print(f"Proximite: {vcnl.proximity}")
+print(f"Lumiere: {vcnl.lux:.1f} lux")
+```
+
+Ce script doit :
+- Importer `adafruit_ahtx0` et `adafruit_vcnl4200`
+- Creer les deux objets capteurs sur le meme bus I2C
+- Lire `.proximity` et `.lux` du VCNL4200
+- Afficher les donnees environnementales et spatiales combinees
 
 ---
 
@@ -187,7 +246,8 @@ qui rend votre code plus robuste.
 
 Dans ce depot, vous devez avoir :
 
-- [ ] `aht20_sensor.py` — Script de lecture du capteur AHT20
+- [ ] `aht20_sensor.py` — Script de lecture du capteur AHT20 (Milestones 1-3)
+- [ ] `multi_capteurs.py` — Script multi-capteurs AHT20 + VCNL4200 (Milestone 4)
 - [ ] `.test_markers/` — Dossier cree par `validate_pi.py`
 
 ---

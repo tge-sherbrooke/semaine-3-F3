@@ -68,6 +68,22 @@ jobs:
           pytest tests/test_milestone_03.py -v --tb=short
 
       # =========================================
+      # MILESTONE 4: Multi-Sensor Integration (25 points)
+      # =========================================
+      - name: "Milestone 4: Multi-Sensor Integration (25 pts)"
+        id: milestone-4
+        continue-on-error: true
+        run: |
+          echo "=============================================="
+          echo "MILESTONE 4: Multi-Sensor Integration"
+          echo "=============================================="
+          echo ""
+          echo "Verifying: VCNL4200 import, sensor creation, proximity/lux reading"
+          echo ""
+          pytest tests/test_milestone_04.py -v --tb=short
+          echo "milestone_4_passed=true" >> $GITHUB_OUTPUT
+
+      # =========================================
       # Summary
       # =========================================
       - name: Results Summary
@@ -81,6 +97,7 @@ jobs:
           echo "  Milestone 1 (25 pts): ${{ steps.milestone-1.outcome }}"
           echo "  Milestone 2 (35 pts): ${{ steps.milestone-2.outcome }}"
           echo "  Milestone 3 (40 pts): ${{ steps.milestone-3.outcome }}"
+          echo "  Milestone 4 (25 pts): ${{ steps.milestone-4.outcome }}"
           echo ""
           echo "=============================================="
           echo ""
@@ -104,5 +121,6 @@ jobs:
           echo "| 1. Environment Setup | 25 | ${{ steps.milestone-1.outcome == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 2. I2C Sensor Reading | 35 | ${{ steps.milestone-2.outcome == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 3. Retry Logic + Quality | 40 | ${{ steps.milestone-3.outcome == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 4. Multi-Sensor (VCNL4200) | 25 | ${{ steps.milestone-4.outcome == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Retries illimites** - Poussez a nouveau pour reessayer!" >> $GITHUB_STEP_SUMMARY

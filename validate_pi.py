@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.9"
 # dependencies = ["adafruit-circuitpython-ahtx0", "adafruit-blinka"]
@@ -204,6 +203,57 @@ def check_aht20_script():
 
 
 # ---------------------------------------------------------------------------
+# Test: VCNL4200 Sensor (Optional - Multi-Sensor Exercise)
+# ---------------------------------------------------------------------------
+def check_vcnl4200(i2c):
+    """Test VCNL4200 sensor reading (non-blocking, for multi-sensor exercise)."""
+    header("VCNL4200 SENSOR CHECK (OPTIONAL)")
+
+    if i2c is None:
+        warn("Cannot test VCNL4200 - I2C not available")
+        return None
+
+    # Check if VCNL4200 is detected at 0x51 via i2cdetect
+    try:
+        result = subprocess.run(
+            ["i2cdetect", "-y", "1"],
+            capture_output=True, text=True, timeout=5
+        )
+        if "51" not in result.stdout:
+            warn("VCNL4200 not detected at address 0x51")
+            info("The VCNL4200 is only needed for the multi-sensor exercise (Milestone 4)")
+            info("Connect via STEMMA QT daisy-chain and run i2cdetect -y 1")
+            return None
+    except Exception:
+        warn("Could not run i2cdetect to check for VCNL4200")
+        return None
+
+    try:
+        import adafruit_vcnl4200
+
+        vcnl = adafruit_vcnl4200.Adafruit_VCNL4200(i2c)
+        info("VCNL4200 found at address 0x51")
+
+        proximity = vcnl.proximity
+        lux = vcnl.lux
+
+        success(f"Proximite: {proximity}")
+        success(f"Lumiere: {lux:.1f} lux")
+
+        create_marker("vcnl4200_verified", f"Proximity={proximity} Lux={lux:.1f}")
+        return True
+
+    except ImportError:
+        warn("adafruit_vcnl4200 not installed")
+        info("Install with: pip install adafruit-circuitpython-vcnl4200")
+        return None
+    except Exception as e:
+        warn(f"VCNL4200 error: {e}")
+        info("Check STEMMA QT daisy-chain connection")
+        return None
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 def main():
@@ -218,6 +268,9 @@ def main():
     results["AHT20"] = check_aht20(i2c)
     results["Script"] = check_aht20_script()
 
+    # Optional VCNL4200 check (non-blocking)
+    vcnl_result = check_vcnl4200(i2c)
+
     # Summary
     header("FINAL RESULTS")
 
@@ -228,6 +281,14 @@ def main():
             success(f"{test}: OK")
         else:
             fail(f"{test}: FAILED")
+
+    # VCNL4200 is optional (shown separately)
+    if vcnl_result is True:
+        success("VCNL4200: OK (multi-sensor ready)")
+    elif vcnl_result is None:
+        warn("VCNL4200: Not detected (optional for Milestone 4)")
+    else:
+        warn("VCNL4200: Error (optional for Milestone 4)")
 
     print()
 
